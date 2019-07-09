@@ -1,0 +1,40 @@
+---
+apiVersion: extensions/v1beta1
+kind: ReplicaSet
+metadata: 
+  name: "jenkins-ssh-agent"
+  labels: 
+    name: "jenkins-ssh-agent"
+spec: 
+  replicas: 1
+  template: 
+    metadata: 
+      name: "jenkins-ssh-agent"
+      labels: 
+        name: "jenkins-ssh-agent"
+    spec: 
+      containers:
+      - name: ssh-slave
+        image: jenkinsci/ssh-slave
+        env:
+          - name: JENKINS_SLAVE_SSH_PUBKEY
+            value: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC3lXl4ODAXtdb6NBVXx8VCOtTT0lKKcNyokxAsE47eb5HjwV/UF9izc+DgDKPt6bC4R6PEeSuYiUzoYsi7MzA2o3NURDH0Fb8XKWLwCykJznVHoqWXITloKxabtFOMR8FyNiV0qIn49NeQqGkLFld2WL4/dJj76DLV6AEqVsB52GVyJjt+TJnMzz9x0dXzRUDM5DIaLDBW3NGSMMpo1DxhJL4HrXGbUjF0TLaqBU8CqxOWmH88EU8yedbBBTSDNTY+8Qk9WWpI2E/ssAWjnLLsrJFxduTg5/iTsF/FWcOHrFmjcsf3ojpy2/PYYA5+jfgHKDn82zcLYdhyqKkxBzIq84/vwMASzgSUc3ONtxirPmIVgCHQixeGHzlAC4ea/6h66QoMyssozyAz3/X4byoG6gqEwDxhJyb36ntL/81wLFt5dZWqg/+OvBZ2XJMetAAjulh3KCPx5gc2G9XWb0JxzwoAiUGsOLONzGPNU/Lu/eMVKJopNY2ZibmwTvR63x7bMiRhe/cO2/5D/LKDhEpy2EAdS8j8wPyTeFZPoxhQPGtiwb4eAB2BudAjAnPTZELk7Hv6pHXrMMCebZhemHToX4q5hOUUZeA5/j+9ynMptCrouUW9v/QmTvmJu0of0vQ2Ywrh7tzDODbov1M55CklLgqkERSiYYIN4ZIbRpsPbw== cje.example.com"
+        livenessProbe:
+          tcpSocket:
+            port: 22
+          initialDelaySeconds: 60
+          timeoutSeconds: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-ssh-agent
+  namespace: jenkins
+spec:
+  selector:
+    name: jenkins-ssh-agent
+  ports:
+  - name: ssh
+    port: 22
+    protocol: TCP
